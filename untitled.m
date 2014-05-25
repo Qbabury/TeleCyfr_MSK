@@ -143,6 +143,7 @@ global sygnal;
 global dlugosc;  
 global n;
 global snr;
+global syg_szum;
 
 snr=get(handles.slider_mod_msk_snr,'Value');
 %%%% 1 wersja - szum dodawany funkcja awgn
@@ -184,34 +185,27 @@ end;
 
 
 function button_demod_msk_odszum_Callback(hObject, eventdata, handles)
-%%%%%%Odszumienie sygna³u
-global sygnal;
+%%%%%%Odszumienie sygna³u , filtr
 global n;
 global dlugosc;
 global odszum;
+global syg_szum;
 
 %W0=[0.016 0.018];
-f1=get(handles.slider_demod_msk_odszum_f1,'Value');
 f2=get(handles.slider_demod_msk_odszum_f2,'Value');
-if f1==0
-    set(handles.text_demod_msk_odszum_value_f1,'String','Podaj niezerowa wartosc');
-elseif f2==0
+if f2==0
     set(handles.text_demod_msk_odszum_value_f2,'String','Podaj niezerowa wartosc');
 else
 %Wn=(fg/(fs/2)) - fg-czestotliwosc graniczna fs-czestotliwosc probkowania
-W1=(f1/(n/2));
 W2=(f2/(n/2));
-if W1>=1
-    set(handles.text_demod_msk_odszum_value_f1,'String','Podaj mniejsza wartosc wartosc');
-elseif W2>=1
+if W2>=1
     set(handles.text_demod_msk_odszum_value_f1,'String','Podaj mniejsza wartosc');
-elseif W1>W2
-    set(handles.text_demod_msk_odszum_value_f1,'String','Czestotliwosc gorna musi byc wieksza od dolnej');
 else
 %W1=[0.024 0.026];
-W1=[W1 W2];
+%W1=[0.0000001 W2];
 N=50;
-odszum=filtracja(sygnal,N,W1);
+
+odszum=filtracja(syg_szum,N,W2);
 end;
 
 axes(handles.wykres_demod_msk_odszum);
@@ -299,6 +293,165 @@ set(handles.text_demod_msk_odszum_value_f2,'String',num2str(k));
  
 function slider_demod_msk_odszum_f2_CreateFcn(hObject, eventdata, handles)
  
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on button press in button_ber.
+function button_ber_Callback(hObject, eventdata, handles)
+% hObject    handle to button_ber (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%%%%%%%Generowanie sygnalu cyfrowego
+global dlugosc2;    
+global y;
+global n;
+
+%%%%%%%Przypadek gdy uzytkownik chce losowac wartosc bitow
+if(get(handles.radio_ber_losuj,'Value')==1)
+    dlugosc2=get(handles.slider_ber,'Value');
+        if dlugosc2==0
+            set(handles.text_ber,'String','Podaj niezerowa wartosc');
+        else
+            dlugosc2=floor(dlugosc2); %zaokraglanie do calkowitej, zeby nie bylo bledu
+            y = randi([0 1],1,dlugosc2);% generowanie s³owa o zadanej d³ugoœci
+            wektor_ber=zeros(1,40);
+            %%%% Modulacja
+            sygnal_ber=msk_mod(y,n);
+            %%%% Szumy
+            for snr=1:40
+
+                sigma2n=(10^(-snr/10))/2;
+                nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc2*n-1));
+                syg_szum = sygnal_ber + nszum;
+
+                %%%% Filtracja
+                f2=2;
+                W2=(f2/(n/2));
+                N=50;
+                odszum=filtracja(syg_szum,N,W2);
+
+                %%%% Demodulacja
+
+                syg_zdem=zeros(1,dlugosc2);
+                    for i=0:dlugosc2-1
+                        syg_zdem(i+1)=msk_demod(odszum,i*n,(i+1)*n);
+                    end
+                %%%% BER
+
+                roznica=zeros(1,dlugosc2);
+                roznica=syg_zdem - y;
+
+                bledy=sum(abs(roznica));
+                BER=bledy/dlugosc2;
+                
+                %%%% Wektor bledow
+                
+                wektor_ber(snr)=BER;
+                       
+            end;
+            
+            axes(handles.wykres_ber);
+            plot(1:40,wektor_ber,'*-');
+            xlabel('SNR');
+            ylabel('BER');
+
+        end;
+end;
+
+%%%%%%%Przypadek gdy uzytkownik chce sam wpisac ciag bitow
+if(get(handles.radio_ber_recznie,'Value')==1)
+    pyt{1} = 'Wprowadz bity:'; % Tekst przy polu do wprowadzenia zmiennej 1
+    tytul = 'Okno do wprowadzania swoich bitow :-)'; % nazwa okna
+    %odp = {'5','7'}; % opcjonalne wartoœci domyœlne
+    y = inputdlg(pyt, tytul, 1); % wywo³anie okna dialogowego
+    y = cell2mat(y);
+    y = num2str(y);
+    dlugosc2=length(y);
+%%%%%%%Sprawdza czy uzytkownik wpisal 0 i 1
+    isValid = true;
+    vec = [];
+    for i=1:dlugosc2
+        if (~(y(i)=='1' || y(i)=='0')) 
+           isValid = false;
+           break;
+        end;
+        vec = [vec, str2num(y(i))];
+    end;
+    y=vec;
+    if (isValid)
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            wektor_ber=zeros(1,40);
+            %%%% Modulacja
+            sygnal_ber=msk_mod(y,n);
+            %%%% Szumy
+            for snr=1:40
+
+                sigma2n=(10^(-snr/10))/2;
+                nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc2*n-1));
+                syg_szum = sygnal_ber + nszum;
+
+                %%%% Filtracja
+                f2=2;
+                W2=(f2/(n/2));
+                N=50;
+                odszum=filtracja(syg_szum,N,W2);
+
+                %%%% Demodulacja
+
+                syg_zdem=zeros(1,dlugosc2);
+                    for i=0:dlugosc2-1
+                        syg_zdem(i+1)=msk_demod(odszum,i*n,(i+1)*n);
+                    end
+                %%%% BER
+
+                roznica=zeros(1,dlugosc2);
+                roznica=syg_zdem - y;
+
+                bledy=sum(abs(roznica));
+                BER=bledy/dlugosc2;
+                
+                %%%% Wektor bledow
+                
+                wektor_ber(snr)=BER;
+                       
+            end;
+            
+            axes(handles.wykres_ber);
+            plot(1:40,wektor_ber,'*-');
+            xlabel('SNR');
+            ylabel('BER');
+        %axes(handles.wykres_ber);
+        %stairs(0:dlugosc2, [y y(dlugosc2)]); 
+        %axis([0 dlugosc2 -0.1 1.1]);
+    else 
+        msgbox('Wpisz tylko 1 i 0');
+    end;
+end;
+
+
+
+% --- Executes on slider movement.
+function slider_ber_Callback(hObject, eventdata, handles)
+% hObject    handle to slider_ber (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+k=get(hObject,'Value');
+set(handles.text_ber,'String',num2str(k));
+
+% --- Executes during object creation, after setting all properties.
+function slider_ber_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider_ber (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end

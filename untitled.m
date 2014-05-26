@@ -43,7 +43,7 @@ if(get(handles.radio_mod_msk_losuj,'Value')==1)
             set(handles.text_mod_msk_wej_value,'String','Podaj niezerowa wartosc');
         else
             dlugosc=floor(dlugosc); %zaokraglanie do calkowitej, zeby nie bylo bledu
-            x = randi([0 1],1,dlugosc);% generowanie s³owa o zadanej d³ugoœci
+            x = randi([0 1],1,dlugosc);% generowanie s?owa o zadanej d?ugo?ci
             axes(handles.wykres_mod_msk_wej);
             stairs(0:dlugosc, [x x(dlugosc)]); 
             axis([0 dlugosc -0.1 1.1]);
@@ -54,8 +54,8 @@ end;
 if(get(handles.radio_mod_msk_recznie,'Value')==1)
     pyt{1} = 'Wprowadz bity:'; % Tekst przy polu do wprowadzenia zmiennej 1
     tytul = 'Okno do wprowadzania swoich bitow :-)'; % nazwa okna
-    %odp = {'5','7'}; % opcjonalne wartoœci domyœlne
-    x = inputdlg(pyt, tytul, 1); % wywo³anie okna dialogowego
+    %odp = {'5','7'}; % opcjonalne warto?ci domy?lne
+    x = inputdlg(pyt, tytul, 1); % wywo?anie okna dialogowego
     x = cell2mat(x);
     x = num2str(x);
     dlugosc=length(x);
@@ -88,10 +88,10 @@ global x;
 global sygnal;
 global dlugosc;
  
-n=100;  % iloœæ próbkowañ w czasie trwania jednego bitu
+n=100;  % ilo?? próbkowa? w czasie trwania jednego bitu
 sygnal=msk_mod(x,n);
 axes(handles.wykres_mod_msk_zmod);
-plot(1:dlugosc*n,sygnal); % przedstawienie zmodulowanego sygna³u
+plot(1:dlugosc*n,sygnal); % przedstawienie zmodulowanego sygna?u
 
 
 
@@ -166,7 +166,7 @@ sigma2n=(10^(-snr/10))/2;
 nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc*n-1));
 syg_szum = sygnal + nszum;
 axes(handles.wykres_mod_msk_zaszum);
-plot(0:dlugosc*n-1,syg_szum); % przedstawienie zaszumionego sygna³u
+plot(0:dlugosc*n-1,syg_szum); % przedstawienie zaszumionego sygnalu
 end;
 
 %x = randi([0 1],1,50);
@@ -185,7 +185,7 @@ end;
 
 
 function button_demod_msk_odszum_Callback(hObject, eventdata, handles)
-%%%%%%Odszumienie sygna³u , filtr
+%%%%%%Odszumienie sygna?u , filtr
 global n;
 global dlugosc;
 global odszum;
@@ -315,7 +315,7 @@ if(get(handles.radio_ber_losuj,'Value')==1)
             set(handles.text_ber,'String','Podaj niezerowa wartosc');
         else
             dlugosc2=floor(dlugosc2); %zaokraglanie do calkowitej, zeby nie bylo bledu
-            y = randi([0 1],1,dlugosc2);% generowanie s³owa o zadanej d³ugoœci
+            y = randi([0 1],1,dlugosc2);% generowanie s?owa o zadanej d?ugo?ci
             wektor_ber=zeros(1,40);
             %%%% Modulacja
             sygnal_ber=msk_mod(y,n);
@@ -353,7 +353,7 @@ if(get(handles.radio_ber_losuj,'Value')==1)
             end;
             
             axes(handles.wykres_ber);
-            plot(1:40,wektor_ber,'*-');
+            semilogy(1:40,wektor_ber,'*-');
             xlabel('SNR');
             ylabel('BER');
 
@@ -364,8 +364,8 @@ end;
 if(get(handles.radio_ber_recznie,'Value')==1)
     pyt{1} = 'Wprowadz bity:'; % Tekst przy polu do wprowadzenia zmiennej 1
     tytul = 'Okno do wprowadzania swoich bitow :-)'; % nazwa okna
-    %odp = {'5','7'}; % opcjonalne wartoœci domyœlne
-    y = inputdlg(pyt, tytul, 1); % wywo³anie okna dialogowego
+    %odp = {'5','7'}; % opcjonalne warto?ci domy?lne
+    y = inputdlg(pyt, tytul, 1); % wywo?anie okna dialogowego
     y = cell2mat(y);
     y = num2str(y);
     dlugosc2=length(y);
@@ -419,7 +419,7 @@ if(get(handles.radio_ber_recznie,'Value')==1)
             end;
             
             axes(handles.wykres_ber);
-            plot(1:40,wektor_ber,'*-');
+            semilogy(1:40,wektor_ber,'*-');
             xlabel('SNR');
             ylabel('BER');
         %axes(handles.wykres_ber);

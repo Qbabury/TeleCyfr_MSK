@@ -74,11 +74,7 @@ if(get(handles.radio_mod_msk_recznie,'Value')==1)
         axes(handles.wykres_mod_msk_wej);
         stairs(0:dlugosc, [x x(dlugosc)]);
         axis([0 dlugosc -0.1 1.1]);
-<<<<<<< HEAD
     else
-=======
-    else 
->>>>>>> a912083a5e2d050eb43893dc98b57f3ef362cd5d
         msgbox('Wpisz tylko 1 lub 0');
     end;
 end;
@@ -92,11 +88,7 @@ global x;
 global sygnal;
 global dlugosc;
  
-<<<<<<< HEAD
-n=100; % ilosc próbkowan w czasie trwania jednego bitu
-=======
 n=100;  % ilosc próbkowan w czasie trwania jednego bitu
->>>>>>> a912083a5e2d050eb43893dc98b57f3ef362cd5d
 sygnal=msk_mod(x,n);
 axes(handles.wykres_mod_msk_zmod);
 plot(1:dlugosc*n,sygnal); % przedstawienie zmodulowanego sygnalu
@@ -113,11 +105,7 @@ global syg_zdem;
 
 axes(handles.wykres_demod_msk_zdemod);
 syg_zdem=zeros(1,dlugosc);
-<<<<<<< HEAD
-%%%%Demodulacja
-=======
 %%%%Demodulacja 
->>>>>>> a912083a5e2d050eb43893dc98b57f3ef362cd5d
 syg_zdem=msk_demod(odszum,dlugosc);
 
 stairs(0:dlugosc, [syg_zdem syg_zdem(dlugosc)]);
@@ -156,23 +144,14 @@ global snr;
 global syg_szum;
 
 snr=get(handles.slider_mod_msk_snr,'Value');
-<<<<<<< HEAD
-
-=======
-if snr==0
-    set(handles.text_mod_msk_zaszum_value,'String','Podaj niezerowa wartosc');
-else
->>>>>>> a912083a5e2d050eb43893dc98b57f3ef362cd5d
 %%%%% Wygenerowanie szumu
 sigma2n=(10^(-snr/10))/2;
 nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc*n-1));
 syg_szum = sygnal + nszum;
 axes(handles.wykres_mod_msk_zaszum);
 plot(0:dlugosc*n-1,syg_szum); % przedstawienie zaszumionego sygnalu
-<<<<<<< HEAD
-=======
-end;
->>>>>>> a912083a5e2d050eb43893dc98b57f3ef362cd5d
+
+
 
 
 function button_demod_msk_odszum_Callback(hObject, eventdata, handles)
@@ -384,11 +363,8 @@ if(get(handles.radio_ber_recznie,'Value')==1)
             hold off
             xlabel('SNR');
             ylabel('BER');
-<<<<<<< HEAD
-    else
-=======
+
     else 
->>>>>>> a912083a5e2d050eb43893dc98b57f3ef362cd5d
         msgbox('Wpisz tylko 1 i 0');
     end;
 end;

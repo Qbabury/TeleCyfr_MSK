@@ -299,7 +299,7 @@ if(get(handles.radio_ber_losuj,'Value')==1)
             
             axes(handles.wykres_ber);
             
-            semilogy(-5:6,wektor_ber,'*-');
+            semilogy(-5:6,wektor_ber,'r*-');
             hold on
             snrs = -5:6;
             semilogy(snrs, 0.5*erfc(sqrt(10.^(snrs/10))));
@@ -355,8 +355,10 @@ if(get(handles.radio_ber_recznie,'Value')==1)
                 wektor_ber(snr+6)=BER;
                        
             end;
+			
+			axes(handles.wykres_ber);
             
-            semilogy(-5:6,wektor_ber,'*-');
+            semilogy(-5:6,wektor_ber,'r*-');
             hold on
             snrs = -5:6;
             semilogy(snrs, 0.5*erfc(sqrt(10.^(snrs/10))));

@@ -144,8 +144,11 @@ global snr;
 global syg_szum;
 
 snr=get(handles.slider_mod_msk_snr,'Value');
+%fs=2;
+E=1;
+N0=E*10^(-snr/10);
 %%%%% Wygenerowanie szumu
-sigma2n=(10^(-snr/10))/2;
+sigma2n=N0;
 nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc*n-1));
 syg_szum = sygnal + nszum;
 axes(handles.wykres_mod_msk_zaszum);
@@ -276,11 +279,16 @@ if(get(handles.radio_ber_losuj,'Value')==1)
             sygnal_ber=msk_mod(y,n);
             %%%% Szumy
             for snr=-5:6
-
-                sigma2n=(10^(-snr/10))/2;
+                
+             %%fs=2;
+             %E=1;
+             sigma2n=10^(-snr/10);
+             %%sigma2n=N0*fs;
+             
+             
                 nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc2*n-1));
                 syg_szum = sygnal_ber + nszum;
-
+                
                 %%%% Demodulacja
                 syg_zdem=zeros(1,dlugosc2);
                 syg_zdem=msk_demod(syg_szum,dlugosc2);
@@ -337,7 +345,7 @@ if(get(handles.radio_ber_recznie,'Value')==1)
             sygnal_ber=msk_mod(y,n);
             %%%% Szumy
             for snr=-5:6
-                sigma2n=(10^(-snr/10))/2;
+                sigma2n=10^(-snr/10);
                 nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc2*n-1));
                 syg_szum = sygnal_ber + nszum;
 

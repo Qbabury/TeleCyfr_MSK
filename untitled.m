@@ -40,7 +40,7 @@ global x
 if(get(handles.radio_mod_msk_losuj,'Value')==1)
     dlugosc=get(handles.slider_mod_msk_bity,'Value');
         if dlugosc==0
-            set(handles.text_mod_msk_wej_value,'String','Podaj niezerowa wartosc');
+            set(handles.text_mod_msk_wej_value,'String','ERROR');
         else
             dlugosc=floor(dlugosc); %zaokraglanie do calkowitej, zeby nie bylo bledu
             x = randi([0 1],1,dlugosc);% generowanie slowa o zadanej dlugosci
@@ -52,8 +52,8 @@ end;
 
 %%%%%%%Przypadek gdy uzytkownik chce sam wpisac ciag bitow
 if(get(handles.radio_mod_msk_recznie,'Value')==1)
-    pyt{1} = 'Wprowadz bity:'; % Tekst przy polu do wprowadzenia zmiennej 1
-    tytul = 'Okno do wprowadzania swoich bitow'; % nazwa okna
+    pyt{1} = 'Enter bits:'; % Tekst przy polu do wprowadzenia zmiennej 1
+    tytul = 'Entering bits window'; % nazwa okna
     %odp = {'5','7'}; % opcjonalne wartosci domyslne
     x = inputdlg(pyt, tytul, 1); % wywolanie okna dialogowego
     x = cell2mat(x);
@@ -75,7 +75,7 @@ if(get(handles.radio_mod_msk_recznie,'Value')==1)
         stairs(0:dlugosc, [x x(dlugosc)]);
         axis([0 dlugosc -0.1 1.1]);
     else
-        msgbox('Wpisz tylko 1 lub 0');
+        msgbox('Enter only 1 or 0');
     end;
 end;
 
@@ -87,7 +87,7 @@ global n;
 global x;
 global sygnal;
 global dlugosc;
- 
+
 n=100;  % ilosc próbkowan w czasie trwania jednego bitu
 sygnal=msk_mod(x,n);
 axes(handles.wykres_mod_msk_zmod);
@@ -144,7 +144,7 @@ global snr;
 global syg_szum;
 
 snr=get(handles.slider_mod_msk_snr,'Value');
-fs=100;
+fs=14;
 E=1;
 N0=E/2*10^(-snr/10);
 %%%%% Wygenerowanie szumu
@@ -158,7 +158,7 @@ plot(0:dlugosc*n-1,syg_szum); % przedstawienie zaszumionego sygnalu
 
 
 function button_demod_msk_odszum_Callback(hObject, eventdata, handles)
-%%%%%%Odszumienie sygnalu , filtr
+%%%%%%Odszumienie sygnalu, filtr
 global n;
 global dlugosc;
 global odszum;
@@ -166,7 +166,7 @@ global syg_szum;
 
 f2=get(handles.slider_demod_msk_odszum_f2,'Value');
 if f2==0
-    set(handles.text_demod_msk_odszum_value_f2,'String','Podaj niezerowa wartosc');
+    set(handles.text_demod_msk_odszum_value_f2,'String','ERROR');
 else
 W2=(f2/(n/2));
 if W2>=1
@@ -278,18 +278,24 @@ if(get(handles.radio_ber_losuj,'Value')==1)
             %%%% Modulacja
             sygnal_ber=msk_mod(y,n);
             %%%% Szumy
-            for snr=-5:6
+            for snr=-5:8
                 
-             fs=100/7;
-             %E=1;
-             N0=(10^(-snr/10))/2;
+             fs=14;
+             Tb=1;
+             f=1/Tb;
+             Tdisp=10*Tb;
+             Ts=10;
+             
+             E=1;
+             N0=E*(10^(-snr/10))/2;
              sigma2n=N0*fs;
              
              
                 nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc2*n-1));
                 syg_szum = sygnal_ber + nszum;
                 
-                W2=(1/(n/2));
+                %%%%Filtracja
+                W2=(1/(dlugosc2*n/2));
                 N=50;
                 odszum=filtracja(syg_szum,N,W2);
                 
@@ -312,9 +318,9 @@ if(get(handles.radio_ber_losuj,'Value')==1)
             
             axes(handles.wykres_ber);
             
-            semilogy(-5:6,wektor_ber,'r*-');
+            semilogy(-5:8,wektor_ber,'r*-');
             hold on
-            snrs = -5:6;
+            snrs = -5:8;
             semilogy(snrs, 0.5*erfc(sqrt(10.^(snrs/10))));
             hold off
             xlabel('SNR');
@@ -350,10 +356,20 @@ if(get(handles.radio_ber_recznie,'Value')==1)
             sygnal_ber=msk_mod(y,n);
             %%%% Szumy
             for snr=-5:6
-                sigma2n=(10^(-snr/10))/2;
+                
+                fs=100/7;
+                E=1;
+                N0=E*(10^(-snr/10))/2;
+                sigma2n=N0*fs;
+                   
                 nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc2*n-1));
                 syg_szum = sygnal_ber + nszum;
-
+                
+                %%%%Filtracja
+                W2=(1/(n/2));
+                N=50;
+                odszum=filtracja(syg_szum,N,W2);
+                
                 %%%% Demodulacja
                 syg_zdem=zeros(1,dlugosc2);
                 syg_zdem=msk_demod(syg_szum,dlugosc2);
@@ -395,3 +411,11 @@ function slider_ber_CreateFcn(hObject, eventdata, handles)
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over button_demod_msk_odszum.
+function button_demod_msk_odszum_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to button_demod_msk_odszum (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

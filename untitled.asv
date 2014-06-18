@@ -53,7 +53,7 @@ end;
 %%%%%%%Przypadek gdy uzytkownik chce sam wpisac ciag bitow
 if(get(handles.radio_mod_msk_recznie,'Value')==1)
     pyt{1} = 'Enter bits:'; % Tekst przy polu do wprowadzenia zmiennej 1
-    tytul = 'Window for entering bits'; % nazwa okna
+    tytul = 'Entering bits window'; % nazwa okna
     %odp = {'5','7'}; % opcjonalne wartosci domyslne
     x = inputdlg(pyt, tytul, 1); % wywolanie okna dialogowego
     x = cell2mat(x);
@@ -347,7 +347,7 @@ end;
 %%%%%%%Przypadek gdy uzytkownik chce sam wpisac ciag bitow
 if(get(handles.radio_ber_recznie,'Value')==1)
     pyt{1} = 'Enter bits:'; % Tekst przy polu do wprowadzenia zmiennej 1
-    tytul = 'window for entering bits'; % nazwa okna
+    tytul = 'Okno do wprowadzania swoich bitow'; % nazwa okna
     %odp = {'5','7'}; % opcjonalne wartosci domyslne
     y = inputdlg(pyt, tytul, 1); % wywolanie okna dialogowego
     y = cell2mat(y);

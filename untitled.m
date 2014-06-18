@@ -89,9 +89,13 @@ global sygnal;
 global dlugosc;
 
 n=100;  % ilosc próbkowan w czasie trwania jednego bitu
-sygnal=msk_mod(x,n);
-axes(handles.wykres_mod_msk_zmod);
-plot(1:dlugosc*n,sygnal); % przedstawienie zmodulowanego sygnalu
+if (isempty(dlugosc)==0)
+    sygnal=msk_mod(x,n);
+    axes(handles.wykres_mod_msk_zmod);
+    plot(1:dlugosc*n,sygnal); % przedstawienie zmodulowanego sygnalu
+else
+    h = msgbox('You must insert a signal.');
+end;
 
 
 
@@ -102,14 +106,17 @@ global dlugosc;
 global odszum;
 global syg_zdem;
 
+if (isempty(odszum)==0)
+    axes(handles.wykres_demod_msk_zdemod);
+    syg_zdem=zeros(1,dlugosc);
+    %%%%Demodulacja 
+    syg_zdem=msk_demod(odszum,dlugosc);
 
-axes(handles.wykres_demod_msk_zdemod);
-syg_zdem=zeros(1,dlugosc);
-%%%%Demodulacja 
-syg_zdem=msk_demod(odszum,dlugosc);
-
-stairs(0:dlugosc, [syg_zdem syg_zdem(dlugosc)]);
-    axis([0 dlugosc -0.1 1.1]);
+    stairs(0:dlugosc, [syg_zdem syg_zdem(dlugosc)]);
+        axis([0 dlugosc -0.1 1.1]);
+else
+    h = msgbox('You must filter a signal.');
+end;
 
 
 
@@ -122,17 +129,21 @@ global dlugosc;
 global BER;
 global bledy;
 
-roznica=zeros(1,dlugosc);
-roznica=syg_zdem - x;
-axes(handles.wykres_demod_msk_wyj);
-stairs(0:dlugosc, [roznica roznica(dlugosc)]);
-    axis([0 dlugosc -1.1 1.1]);
+if (isempty(syg_zdem)==0)
+    roznica=zeros(1,dlugosc);
+    roznica=syg_zdem - x;
+    axes(handles.wykres_demod_msk_wyj);
+    stairs(0:dlugosc, [roznica roznica(dlugosc)]);
+        axis([0 dlugosc -1.1 1.1]);
+    bledy=sum(abs(roznica));
+    BER=bledy/dlugosc;
+
+    set(handles.text_demod_msk_ber_value,'String',num2str(BER));
     
-bledy=sum(abs(roznica));
-BER=bledy/dlugosc;
-
-set(handles.text_demod_msk_ber_value,'String',num2str(BER));
-
+    clear all;
+else
+    h = msgbox('You must demodulate a signal.');
+end;
 
 
 function button_mod_msk_zaszum_Callback(hObject, eventdata, handles)
@@ -143,16 +154,20 @@ global n;
 global snr;
 global syg_szum;
 
-snr=get(handles.slider_mod_msk_snr,'Value');
-fs=14;
-E=1;
-N0=E/2*10^(-snr/10);
-%%%%% Wygenerowanie szumu
-sigma2n=N0*fs;
-nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc*n-1));
-syg_szum = sygnal + nszum;
-axes(handles.wykres_mod_msk_zaszum);
-plot(0:dlugosc*n-1,syg_szum); % przedstawienie zaszumionego sygnalu
+if (isempty(sygnal)==0)
+    snr=get(handles.slider_mod_msk_snr,'Value');
+    fs=14;
+    E=1;
+    N0=E/2*10^(-snr/10);
+    %%%%% Wygenerowanie szumu
+    sigma2n=N0*fs;
+    nszum=sqrt(sigma2n)*randn(1, length(0:dlugosc*n-1));
+    syg_szum = sygnal + nszum;
+    axes(handles.wykres_mod_msk_zaszum);
+    plot(0:dlugosc*n-1,syg_szum); % przedstawienie zaszumionego sygnalu
+else
+    h = msgbox('You must modulate a signal.');
+end;
 
 
 
@@ -163,23 +178,26 @@ global n;
 global dlugosc;
 global odszum;
 global syg_szum;
+if (isempty(syg_szum)==0)
+    f2=get(handles.slider_demod_msk_odszum_f2,'Value');
+    if f2==0
+        set(handles.text_demod_msk_odszum_value_f2,'String','ERROR');
+    else
+    W2=(f2/(n/2));
+    if W2>=1
+        set(handles.text_demod_msk_odszum_value_f1,'String','Podaj mniejsza wartosc');
+    else
+    N=50;
+    odszum=filtracja(syg_szum,N,W2);
+    end;
 
-f2=get(handles.slider_demod_msk_odszum_f2,'Value');
-if f2==0
-    set(handles.text_demod_msk_odszum_value_f2,'String','ERROR');
+    axes(handles.wykres_demod_msk_odszum);
+    plot(0:dlugosc*n-1,odszum);
+        axis([0 dlugosc*n -1.1 1.1]);        
+    end;
 else
-W2=(f2/(n/2));
-if W2>=1
-    set(handles.text_demod_msk_odszum_value_f1,'String','Podaj mniejsza wartosc');
-else
-N=50;
-odszum=filtracja(syg_szum,N,W2);
-end;
-
-axes(handles.wykres_demod_msk_odszum);
-plot(0:dlugosc*n-1,odszum);
-    axis([0 dlugosc*n -1.1 1.1]);
-end;
+    h = msgbox('You must insert AWGN.');
+end;    
 
 
 
@@ -262,10 +280,7 @@ end
 %
 function button_ber_Callback(hObject, eventdata, handles)
 %%%%%%%Generowanie sygnalu cyfrowego
-global dlugosc2;
-global y;
-global n;
-
+n=100;
 %%%%%%%Przypadek gdy uzytkownik chce losowac wartosc bitow
 if(get(handles.radio_ber_losuj,'Value')==1)
     dlugosc2=get(handles.slider_ber,'Value');
@@ -419,3 +434,21 @@ function button_demod_msk_odszum_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to button_demod_msk_odszum (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in msk_clear_button.
+function msk_clear_button_Callback(hObject, eventdata, handles)
+% hObject    handle to msk_clear_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%cla(handles.wykres_mod_msk_wej);
+%cla(handles.wykres_mod_msk_zmod);
+%cla(handles.wykres_mod_msk_zaszum);
+%cla(handles.wykres_mod_msk_odszum);
+%cla(handles.wykres_mod_msk_zdemod);
+%cla(handles.wykres_mod_msk_msk_wyj);
+%cla(handles.wykres_ber);
+arrayfun(@cla,findall(0,'type','axes'));
+clear all;
+%msk_clear_button

@@ -156,7 +156,8 @@ global syg_szum;
 
 if (isempty(sygnal)==0)
     snr=get(handles.slider_mod_msk_snr,'Value');
-    fs=14;
+    Tb=7;
+    fs=n/Tb;
     E=1;
     N0=E/2*10^(-snr/10);
     %%%%% Wygenerowanie szumu
@@ -281,6 +282,10 @@ end
 function button_ber_Callback(hObject, eventdata, handles)
 %%%%%%%Generowanie sygnalu cyfrowego
 n=100;
+Tb=7;
+fs=n/Tb;
+E=1;
+
 %%%%%%%Przypadek gdy uzytkownik chce losowac wartosc bitow
 if(get(handles.radio_ber_losuj,'Value')==1)
     dlugosc2=get(handles.slider_ber,'Value');
@@ -295,13 +300,7 @@ if(get(handles.radio_ber_losuj,'Value')==1)
             %%%% Szumy
             for snr=-5:8
                 
-             fs=14;
-             Tb=1;
-             f=1/Tb;
-             Tdisp=10*Tb;
-             Ts=10;
              
-             E=1;
              N0=E*(10^(-snr/10))/2;
              sigma2n=N0*fs;
              
@@ -347,7 +346,7 @@ end;
 %%%%%%%Przypadek gdy uzytkownik chce sam wpisac ciag bitow
 if(get(handles.radio_ber_recznie,'Value')==1)
     pyt{1} = 'Enter bits:'; % Tekst przy polu do wprowadzenia zmiennej 1
-    tytul = 'window for entering bits'; % nazwa okna
+    tytul = 'Window for entering bits'; % nazwa okna
     %odp = {'5','7'}; % opcjonalne wartosci domyslne
     y = inputdlg(pyt, tytul, 1); % wywolanie okna dialogowego
     y = cell2mat(y);
@@ -371,14 +370,9 @@ if(get(handles.radio_ber_recznie,'Value')==1)
             sygnal_ber=msk_mod(y,n);
             %%%% Szumy
             for snr=-5:8
-                
-             fs=14;
-             Tb=1;
-             f=1/Tb;
-             Tdisp=10*Tb;
-             Ts=10;
-             
-             E=1;
+                         
+             fs=n/Tb;
+                                      
              N0=E*(10^(-snr/10))/2;
              sigma2n=N0*fs;
              
@@ -436,27 +430,15 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
 end
 
 
-% --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over button_demod_msk_odszum.
+
 function button_demod_msk_odszum_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to button_demod_msk_odszum (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in msk_clear_button.
+
+
 function msk_clear_button_Callback(hObject, eventdata, handles)
-% hObject    handle to msk_clear_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-%cla(handles.wykres_mod_msk_wej);
-%cla(handles.wykres_mod_msk_zmod);
-%cla(handles.wykres_mod_msk_zaszum);
-%cla(handles.wykres_mod_msk_odszum);
-%cla(handles.wykres_mod_msk_zdemod);
-%cla(handles.wykres_mod_msk_msk_wyj);
-%cla(handles.wykres_ber);
+
 arrayfun(@cla,findall(0,'type','axes'));
 clear all;
-%msk_clear_button
+

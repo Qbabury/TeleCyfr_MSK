@@ -1,26 +1,53 @@
 function [wyjscie] = msk_demod(sygnal,n)
 sygnal_zdemodulowany=zeros(1,n);
 probki=100;
-time=1/100:1/100:1;
-for i=1:n   
-    signal=sygnal((i-1)*probki+1:i*100);
-    if mod(i,2)==1
-        splot=signal.*sin(2*pi*3/4*time);
-        zera=sum(abs(splot));
+t=1/100:1/100:1;
+calka_zera=zeros(1,n);
+calka_jedynki=zeros(1,n);
+%E=1;
+%Tb=1;
 
-        splot=signal.*sin(2*pi*5/4*time);
-        jedynki=sum(abs(splot));
+for i=2:n   
+    signal=sygnal((i-1)*probki+1:i*probki);
+    if mod(i,2)==1
+        splot=signal.*sin(2*pi*3/4*t);
+        calka_zera(i)=calka_zera(i-1)+sum(splot);
+            if calka_zera > 0
+                estymata0 = 0;
+            else
+                estymata0 = pi;
+            end
+                
+        splot=signal.*sin(2*pi*5/4*t);
+        calka_jedynki(i+1)=calka_jedynki(i)+sum(splot);
+            if calka_jedynki > 0
+                estymata1 = -pi/2;
+            else
+                estymata1 = pi/2;
+            end
     else
-        splot=signal.*cos(2*pi*3/4*time);
-        zera=sum(abs(splot));
+        splot=signal.*cos(2*pi*3/4*t);
+        calka_zera(i)=calka_zera(i-1)+sum(splot);
+            if calka_zera > 0
+                estymata0 = 0;
+            else
+                estymata0 = pi;
+            end
        
-        splot=signal.*cos(2*pi*5/4*time);
-        jedynki=sum(abs(splot));
+        splot=signal.*cos(2*pi*5/4*t);
+        calka_jedynki(i+1)=calka_jedynki(i)+sum(splot);
+            if calka_jedynki > 0
+                estymata1 = -pi/2;
+            else
+                estymata1 = pi/2;
+            end
     end
-    if zera>jedynki
+    
+    if (((estymata0 == 0) && (estymata1 == -pi/2)) || ((estymata0 == pi) && (estymata1 == pi/2)))
         sygnal_zdemodulowany(i)=0;
-    else
+    else 
         sygnal_zdemodulowany(i)=1;
     end
+    
     wyjscie=sygnal_zdemodulowany;
 end

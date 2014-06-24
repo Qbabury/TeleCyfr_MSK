@@ -89,8 +89,9 @@ global sygnal;
 global dlugosc;
 
 n=100;  % ilosc próbkowan w czasie trwania jednego bitu
+E=5;
 if (isempty(dlugosc)==0)
-    sygnal=msk_mod(x,n);
+    sygnal=msk_mod(x,n,E);
     axes(handles.wykres_mod_msk_zmod);
     plot(1:dlugosc*n,sygnal); % przedstawienie zmodulowanego sygnalu
 else
@@ -194,7 +195,8 @@ if (isempty(syg_szum)==0)
 
     axes(handles.wykres_demod_msk_odszum);
     plot(0:dlugosc*n-1,odszum);
-        axis([0 dlugosc*n -1.1 1.1]);        
+        
+        
     end;
 else
     h = msgbox('You must insert AWGN.');
@@ -284,7 +286,7 @@ function button_ber_Callback(hObject, eventdata, handles)
 n=100;
 Tb=7;
 fs=n/Tb;
-E=1;
+E=5;
 
 %%%%%%%Przypadek gdy uzytkownik chce losowac wartosc bitow
 if(get(handles.radio_ber_losuj,'Value')==1)
@@ -296,7 +298,7 @@ if(get(handles.radio_ber_losuj,'Value')==1)
             y = randi([0 1],1,dlugosc2);% generowanie s?owa o zadanej dlugosci
             wektor_ber=zeros(1,12);
             %%%% Modulacja
-            sygnal_ber=msk_mod(y,n);
+            sygnal_ber=msk_mod(y,n,E);
             %%%% Szumy
             for snr=-5:8
                 
